@@ -28,6 +28,7 @@ torchrun --nproc_per_node=NUM_GPUS gradio/t2v_14B_multiGPU.py --ckpt_dir PATH_TO
 ```
 
 Where:
+
 - `NUM_GPUS` is the number of GPUs you want to use
 - `PATH_TO_CHECKPOINTS` is the path to the directory containing the model checkpoints
 
@@ -101,11 +102,12 @@ torchrun --nproc_per_node=NUM_GPUS gradio/test_multiGPU.py --ckpt_dir PATH_TO_CH
 ```
 
 This script will:
-1. Initialize the distributed environment
+
+1. Initialise the distributed environment
 2. Test GPU memory availability
 3. Load the model configuration
-4. Initialize the WanT2V model
-5. Test synchronization between processes
+4. Initialise the WanT2V model
+5. Test synchronisation between processes
 6. Report model parameters
 
 If the test completes successfully, you can proceed to run the full Gradio interface with the same configuration.

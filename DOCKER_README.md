@@ -40,6 +40,7 @@ We provide a convenient script to run the Docker container with different config
 ```
 
 Options:
+
 - `-c, --checkpoint-dir DIR`: Path to checkpoint directory (default: ./cache)
 - `-o, --output-dir DIR`: Path to output directory (default: ./output)
 - `-g, --gpus NUM`: Number of GPUs to use (default: 2)
