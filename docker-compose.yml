@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  wan-multi-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount checkpoint directory - update this path to your local checkpoint directory
+      - ${CHECKPOINT_DIR:-./cache}:/app/cache
+      # Optional: Mount a directory for saving generated videos
+      - ${OUTPUT_DIR:-./output}:/app/output
+    ports:
+      - "7860:7860"  # Gradio web interface
+    environment:
+      # Set to the number of GPUs you want to use
+      - NUM_GPUS=${NUM_GPUS:-2}
+      # Set to the parallelism strategy: "fsdp" or "sequence"
+      - PARALLEL_STRATEGY=${PARALLEL_STRATEGY:-fsdp}
+      # Set ulysses_size and ring_size for sequence parallelism
+      - ULYSSES_SIZE=${ULYSSES_SIZE:-2}
+      - RING_SIZE=${RING_SIZE:-1}
+      # Set to the port for the Gradio server
+      - SERVER_PORT=${SERVER_PORT:-7860}
+    # Use runtime: nvidia to enable GPU access
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${NUM_GPUS:-2}
+              capabilities: [gpu]
+    # Command to run the multi-GPU Gradio app
+    command: >
+      bash -c '
+      if [ "$${PARALLEL_STRATEGY}" = "fsdp" ]; then
+        torchrun --nproc_per_node=$${NUM_GPUS} gradio/t2v_14B_multiGPU.py --ckpt_dir /app/cache --t5_fsdp --dit_fsdp --server_port $${SERVER_PORT}
+      elif [ "$${PARALLEL_STRATEGY}" = "sequence" ]; then
+        torchrun --nproc_per_node=$${NUM_GPUS} gradio/t2v_14B_multiGPU.py --ckpt_dir /app/cache --ulysses_size $${ULYSSES_SIZE} --ring_size $${RING_SIZE} --server_port $${SERVER_PORT}
+      else
+        echo "Invalid PARALLEL_STRATEGY: $${PARALLEL_STRATEGY}. Must be 'fsdp' or 'sequence'."
+        exit 1
+      fi
+      '
