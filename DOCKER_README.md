@@ -130,6 +130,6 @@ If you encounter out-of-memory errors:
 
 ## Notes
 
-- The Docker setup uses the `pytorch/pytorch:2.4.0-cuda12.1-cudnn8-runtime` base image, which includes PyTorch with CUDA support.
+- The Docker setup uses the `pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime` base image, which includes PyTorch with CUDA support.
 - The container mounts your local checkpoint directory to `/app/cache` inside the container.
 - Generated videos are saved to the mounted output directory.
