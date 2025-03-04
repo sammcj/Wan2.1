@@ -1,5 +1,7 @@
 FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Set working directory
 WORKDIR /app
 
