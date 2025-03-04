@@ -18,8 +18,11 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements file
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies (excluding torch, torchvision, and flash_attn which we'll install separately)
+RUN grep -v -E "torch|torchvision|flash_attn" requirements.txt > requirements_filtered.txt && \
+  pip install --no-cache-dir torch==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cu121 && \
+  pip install --no-cache-dir -r requirements_filtered.txt && \
+  pip install --no-cache-dir flash-attn==2.4.2
 
 # Install additional dependencies for multi-GPU support
 RUN pip install --no-cache-dir xfuser
