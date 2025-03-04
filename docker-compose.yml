@@ -1,3 +1,4 @@
+
 services:
   wan-multi-gpu:
     build:
@@ -8,6 +9,8 @@ services:
       - ${CHECKPOINT_DIR:-./cache}:/app/cache
       # Optional: Mount a directory for saving generated videos
       - ${OUTPUT_DIR:-./output}:/app/output
+      # Mount specific model directory if provided
+      - ${MODEL_DIR:-./models}:/app/models
     ports:
       - "7860:7860"  # Gradio web interface
     environment:
@@ -28,15 +31,3 @@ services:
             - driver: nvidia
               count: ${NUM_GPUS:-2}
               capabilities: [gpu]
-    # Command to run the multi-GPU Gradio app
-    command: >
-      bash -c '
-      if [ "$${PARALLEL_STRATEGY}" = "fsdp" ]; then
-        torchrun --nproc_per_node=$${NUM_GPUS} gradio/t2v_14B_multiGPU.py --ckpt_dir /app/cache --t5_fsdp --dit_fsdp --server_port $${SERVER_PORT}
-      elif [ "$${PARALLEL_STRATEGY}" = "sequence" ]; then
-        torchrun --nproc_per_node=$${NUM_GPUS} gradio/t2v_14B_multiGPU.py --ckpt_dir /app/cache --ulysses_size $${ULYSSES_SIZE} --ring_size $${RING_SIZE} --server_port $${SERVER_PORT}
-      else
-        echo "Invalid PARALLEL_STRATEGY: $${PARALLEL_STRATEGY}. Must be 'fsdp' or 'sequence'."
-        exit 1
-      fi
-      '

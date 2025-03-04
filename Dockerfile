@@ -22,6 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install additional dependencies for multi-GPU support
 RUN pip install --no-cache-dir xfuser
 
+# Copy entrypoint script first to leverage Docker cache
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Copy project files
 COPY . .
 
@@ -31,5 +35,5 @@ RUN chmod +x gradio/examples/run_multiGPU_example.sh gradio/examples/run_sequenc
 # Set environment variables
 ENV PYTHONPATH=/app
 
-# Default command - can be overridden in docker-compose.yml
-CMD ["bash"]
+# Set entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]

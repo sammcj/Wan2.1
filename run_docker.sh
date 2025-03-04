@@ -4,6 +4,7 @@
 # Default values
 CHECKPOINT_DIR="./cache"
 OUTPUT_DIR="./output"
+MODEL_DIR=""
 NUM_GPUS=2
 PARALLEL_STRATEGY="fsdp"
 ULYSSES_SIZE=2
@@ -17,6 +18,7 @@ show_help() {
   echo ""
   echo "Options:"
   echo "  -c, --checkpoint-dir DIR   Path to checkpoint directory (default: ./cache)"
+  echo "  -m, --model-dir DIR        Path to specific model directory (takes precedence over checkpoint-dir)"
   echo "  -o, --output-dir DIR       Path to output directory (default: ./output)"
   echo "  -g, --gpus NUM             Number of GPUs to use (default: 2)"
   echo "  -p, --parallel STRATEGY    Parallelism strategy: fsdp or sequence (default: fsdp)"
@@ -35,6 +37,10 @@ while [[ $# -gt 0 ]]; do
   case $1 in
   -c | --checkpoint-dir)
     CHECKPOINT_DIR="$2"
+    shift 2
+    ;;
+  -m | --model-dir)
+    MODEL_DIR="$2"
     shift 2
     ;;
   -o | --output-dir)
@@ -78,7 +84,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate arguments
-if [ ! -d "$CHECKPOINT_DIR" ]; then
+if [ -n "$MODEL_DIR" ]; then
+  if [ ! -d "$MODEL_DIR" ]; then
+    echo "Error: Model directory '$MODEL_DIR' does not exist."
+    exit 1
+  fi
+elif [ ! -d "$CHECKPOINT_DIR" ]; then
   echo "Error: Checkpoint directory '$CHECKPOINT_DIR' does not exist."
   exit 1
 fi
@@ -99,7 +110,11 @@ fi
 
 # Run Docker container
 echo "Starting Wan2.1 Multi-GPU with Docker..."
-echo "  Checkpoint directory: $CHECKPOINT_DIR"
+if [ -n "$MODEL_DIR" ]; then
+  echo "  Model directory: $MODEL_DIR"
+else
+  echo "  Checkpoint directory: $CHECKPOINT_DIR"
+fi
 echo "  Output directory: $OUTPUT_DIR"
 echo "  Number of GPUs: $NUM_GPUS"
 echo "  Parallel strategy: $PARALLEL_STRATEGY"
@@ -111,6 +126,7 @@ echo "  Server port: $SERVER_PORT"
 echo ""
 
 CHECKPOINT_DIR="$CHECKPOINT_DIR" \
+  MODEL_DIR="$MODEL_DIR" \
   OUTPUT_DIR="$OUTPUT_DIR" \
   NUM_GPUS="$NUM_GPUS" \
   PARALLEL_STRATEGY="$PARALLEL_STRATEGY" \

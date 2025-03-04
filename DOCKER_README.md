@@ -42,6 +42,7 @@ We provide a convenient script to run the Docker container with different config
 Options:
 
 - `-c, --checkpoint-dir DIR`: Path to checkpoint directory (default: ./cache)
+- `-m, --model-dir DIR`: Path to specific model directory (takes precedence over checkpoint-dir)
 - `-o, --output-dir DIR`: Path to output directory (default: ./output)
 - `-g, --gpus NUM`: Number of GPUs to use (default: 2)
 - `-p, --parallel STRATEGY`: Parallelism strategy: fsdp or sequence (default: fsdp)
@@ -58,6 +59,7 @@ You can customize the Docker setup using environment variables:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `CHECKPOINT_DIR` | Path to the model checkpoints directory | `./cache` |
+| `MODEL_DIR` | Path to a specific model directory (takes precedence over CHECKPOINT_DIR) | - |
 | `OUTPUT_DIR` | Path to save generated videos | `./output` |
 | `NUM_GPUS` | Number of GPUs to use | `2` |
 | `PARALLEL_STRATEGY` | Parallelism strategy (`fsdp` or `sequence`) | `fsdp` |
@@ -66,6 +68,35 @@ You can customize the Docker setup using environment variables:
 | `SERVER_PORT` | Port for the Gradio server | `7860` |
 
 ## Examples
+
+### Using Pre-downloaded Model Files
+
+If you already have the model files downloaded (e.g., from Hugging Face), you can mount them directly:
+
+```bash
+# Using the dedicated script for pre-downloaded models
+./run_with_model.sh /path/to/model/directory [num_gpus]
+
+# Using the run_docker.sh script
+./run_docker.sh -m /path/to/model/directory -g 2
+
+# Or using environment variables
+MODEL_DIR=/path/to/model/directory \
+NUM_GPUS=2 \
+docker-compose up
+```
+
+For example, with the directory structure shown:
+
+```bash
+# Simple approach
+./run_with_model.sh /mnt/llm/models/Wan-AI_Wan2.1-T2V-14B 2
+
+# Or with environment variables
+MODEL_DIR=/mnt/llm/models/Wan-AI_Wan2.1-T2V-14B \
+NUM_GPUS=2 \
+docker-compose up
+```
 
 ### Using 2 GPUs with FSDP Parallelism
 
